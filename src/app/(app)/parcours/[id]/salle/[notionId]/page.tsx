@@ -8,6 +8,8 @@ import { aiConfigured } from "@/lib/ai";
 import { Diagram } from "@/components/Diagram";
 import { NetworkAnimation } from "@/components/NetworkAnimation";
 import { ZoomableImage } from "@/components/ZoomableImage";
+import { SchemaPrompt } from "@/components/SchemaPrompt";
+import { imageConfigured } from "@/lib/config";
 import { ClassroomLayout } from "@/components/ClassroomLayout";
 import { TutorChat } from "@/components/TutorChat";
 import { NoteEditor } from "@/components/NoteEditor";
@@ -177,6 +179,13 @@ export default async function ClassroomPage({
                 context={[notion.summary, notion.explanation, notion.example].filter(Boolean).join(" ")}
               />
             </div>
+            <SchemaPrompt
+              title={String(notion.title)}
+              context={[notion.summary, notion.explanation, notion.example].filter(Boolean).join(" ")}
+              courseId={courseId}
+              notionId={nId}
+              configured={imageConfigured()}
+            />
           </section>
         ) : null}
 

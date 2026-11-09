@@ -10,6 +10,7 @@ import { CheckQuestions } from "@/components/CheckQuestions";
 import { NetworkAnimation } from "@/components/NetworkAnimation";
 import { ImageGallery } from "@/components/ImageGallery";
 import { ZoomableImage } from "@/components/ZoomableImage";
+import { SchemaPrompt } from "@/components/SchemaPrompt";
 import { listNotionImages } from "@/lib/images";
 import { config, imageConfigured } from "@/lib/config";
 import { generateFicheAction } from "@/app/actions/fiche";
@@ -199,6 +200,13 @@ function FicheView({
               context={[content.intro, ...content.keyPoints, content.example].filter(Boolean).join(" ")}
             />
           </div>
+          <SchemaPrompt
+            title={content.title}
+            context={[content.intro, ...content.keyPoints, content.example].filter(Boolean).join(" ")}
+            courseId={courseId}
+            notionId={notionId}
+            configured={imagesConfigured}
+          />
         </section>
       ) : null}
 

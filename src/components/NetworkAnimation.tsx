@@ -322,6 +322,20 @@ function LayersAnimation() {
   );
 }
 
+export function getAnimationOutline(
+  title: string,
+  context = "",
+): { caption: string; steps: Array<{ title: string; detail: string }> } {
+  const scenario = pickScenario(`${title} ${context}`);
+  if (scenario === "layers") {
+    return { caption: "Encapsulation", steps: LAYER_FRAMES.map((f) => ({ title: f.title, detail: f.detail })) };
+  }
+  return {
+    caption: scenario.caption,
+    steps: scenario.frames.map((f) => ({ title: f.title, detail: f.detail })),
+  };
+}
+
 export function NetworkAnimation({ title, context = "" }: { title: string; context?: string }) {
   const scenario = useMemo(() => pickScenario(`${title} ${context}`), [title, context]);
   if (scenario === "layers") return <LayersAnimation />;
