@@ -68,8 +68,9 @@ Sources consultées le **9 novembre 2026**, à revérifier car les modèles et t
   **0,40 $/M en sortie** ; Gemini 2.5 Flash ~**0,30 $ / 2,50 $**.
   `aistudio.google.com/docs/pricing` (page mise à jour 2026-10-30).
 
-Stratégie recommandée : **Gemini free tier** ou **OpenRouter `:free`** en priorité, bascule payante
-seulement si les quotas bloquent, avec des tarifs saisis dans `.env`.
+Stratégie retenue (décision du 9 novembre 2026) : **Gemini free tier** ou **OpenRouter `:free`** en
+priorité, bascule payante seulement si les quotas bloquent, avec des tarifs saisis dans `.env`.
+L'usage des tiers gratuits est accepté, avec la réserve de confidentialité documentée dans `SECURITY.md`.
 
 ## Ordres de grandeur
 

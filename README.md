@@ -6,6 +6,10 @@ développement web) à partir de **vos propres PDF ou notes**, avec un **tuteur 
 > Kwiga est un outil pédagogique privé. Il ne s'agit ni d'une formation officielle Cisco, ni d'une
 > certification. Les évaluations produites par l'IA sont indicatives.
 
+Comptes au lancement : **Keziakdos** (administrateur) et **didioos** (apprenant). Aucun mot de passe
+n'est fourni par défaut : ils sont créés via la commande d'initialisation sécurisée (`npm run seed`).
+Éditeur affiché dans les mentions légales : **Keziakdos**.
+
 ## Fonctionnalités
 
 - **Comptes privés** : connexion par identifiant, aucun formulaire d'inscription publique. Rôles

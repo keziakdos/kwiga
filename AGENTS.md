@@ -12,7 +12,7 @@ Langue de travail : **français**. Code/noms techniques en anglais.
 - Développement : OpenCode sur WSL Ubuntu (Node 22, npm 10, Ubuntu 24.04, `docker` = podman 4.9.3)
 - VPS : utilisateur SSH `trading`, partagé avec d'autres sites — **ne rien perturber**
 - Accès gratuit, comptes créés uniquement par l'administrateur (aucune inscription publique)
-- Comptes au lancement : 1 administrateur (identifiant à demander) + apprenant `didioos`
+- Comptes au lancement : administrateur `Keziakdos` + apprenant `didioos`
 - Budget mensuel total maximal : **10 €**
 - Distinguer 3 postes de coût : (1) IA de développement OpenCode, (2) API IA du tuteur, (3) hébergement/domaine
 

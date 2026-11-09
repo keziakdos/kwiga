@@ -63,9 +63,17 @@ par l'administrateur. Les données (documents, conversations, résultats) sont s
   en tenir compte avant d'activer l'IA sur des documents sensibles.
 - Aucune base vectorielle externe, aucun service SaaS obligatoire.
 
+## Décision sur les tiers gratuits
+
+Décision du propriétaire (9 novembre 2026) : l'usage des tiers gratuits (Google AI Studio ou modèles
+OpenRouter `:free`) est **accepté** pour le tuteur, malgré la possibilité que ces fournisseurs
+réutilisent les données pour améliorer leurs produits. Cette information doit rester visible dans la
+politique de confidentialité. Les documents particulièrement sensibles ne devraient pas être importés
+dans ce mode ; l'administrateur peut basculer vers un fournisseur payant en changeant `.env`.
+
 ## Ce qui reste à faire avant une mise en production publique
 
-- Revoir la politique de rétention du fournisseur IA choisi et l'indiquer aux utilisateurs.
+- Renseigner le contact de support dans les mentions légales (`LEGAL_CONTACT_EMAIL`).
 - Mettre une sauvegarde hors VPS testée en place.
 - Vérifier la configuration Nginx (HTTPS, HSTS) et le renouvellement Certbot.
 - Faire relire les mentions légales par une personne compétente.
