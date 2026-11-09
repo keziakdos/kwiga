@@ -160,7 +160,7 @@ Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour :
 Règles :
 - Appuie-toi sur les extraits fournis (documents de l'apprenant) et n'invente ni citation ni numéro de page.
 - Si une information manque, reste général et signale-le brièvement.
-- Le diagramme doit être du Mermaid valide (flowchart, graph ou sequenceDiagram), simple, sans HTML, avec des nœuds représentant des ordinateurs, un switch ou un routeur quand c'est pertinent.
+- Le diagramme doit être du Mermaid v11 STRICTEMENT valide : commence par "flowchart TD" ou "sequenceDiagram", identifiants de nœuds simples (A, B, C), libellés entre guillemets s'ils contiennent des accents, parenthèses ou espaces, aucune balise HTML, aucun bloc Markdown. Représente des ordinateurs, un switch ou un routeur quand c'est pertinent.
 - 3 à 6 points clés, 3 à 7 étapes, 2 à 3 questions de vérification avec une réponse courte et juste.`;
     const user = `Notion : ${params.notion.title}
 Résumé : ${params.notion.summary ?? ""}

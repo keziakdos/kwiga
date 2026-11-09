@@ -106,7 +106,8 @@ Contraintes :
 - Couvre TOUS les thèmes majeurs présents dans les extraits fournis, sans en ignorer. Adapte le nombre de modules à la richesse du document (3 à 8 modules).
 - Chaque notion doit inclure un champ "pages": [numéros de page réellement utilisés dans les extraits], ou [] si l'information vient de connaissances générales.
 - 2 à 4 notions par module, contenu technique exact, français simple, adapté au niveau indiqué, appuyé sur les extraits fournis.
-- Ne jamais inventer de citation ni de numéro de page.`;
+- Ne jamais inventer de citation ni de numéro de page.
+- Le champ "diagram" doit être un Mermaid v11 valide (commence par "flowchart TD"), avec des identifiants simples (A, B, C) et des libellés entre guillemets si nécessaire. Sinon, laisser une chaîne vide.`;
 
   const user = `Parcours : ${params.title}
 Domaine : ${params.domain}
