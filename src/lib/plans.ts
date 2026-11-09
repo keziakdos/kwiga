@@ -382,6 +382,7 @@ export function materializePlan(courseId: number, planId: number, content: PlanC
         .run(courseId, planId, module.title, module.description, moduleIndex);
       const moduleId = Number(moduleRes.lastInsertRowid);
 
+      let firstNotionId: number | null = null;
       for (const notion of module.notions) {
         const notionRes = db
           .prepare(
@@ -400,22 +401,25 @@ export function materializePlan(courseId: number, planId: number, content: PlanC
             notionOrd++,
           );
         const notionId = Number(notionRes.lastInsertRowid);
+        if (firstNotionId === null) firstNotionId = notionId;
+      }
 
-        for (const ex of module.exercises ?? []) {
-          db.prepare(
-            `INSERT INTO exercises (course_id, notion_id, type, prompt, options_json, correct_json, criteria_json, points)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          ).run(
-            courseId,
-            notionId,
-            ex.type,
-            ex.prompt,
-            ex.options ? JSON.stringify(ex.options) : null,
-            ex.correct ? JSON.stringify(ex.correct) : null,
-            ex.criteria ? JSON.stringify(ex.criteria) : null,
-            ex.points ?? 1,
-          );
-        }
+      // Les exercices appartiennent au module : une seule insertion, rattachée
+      // à la première notion du module (et non dupliquée pour chaque notion).
+      for (const ex of module.exercises ?? []) {
+        db.prepare(
+          `INSERT INTO exercises (course_id, notion_id, type, prompt, options_json, correct_json, criteria_json, points)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        ).run(
+          courseId,
+          firstNotionId,
+          ex.type,
+          ex.prompt,
+          ex.options ? JSON.stringify(ex.options) : null,
+          ex.correct ? JSON.stringify(ex.correct) : null,
+          ex.criteria ? JSON.stringify(ex.criteria) : null,
+          ex.points ?? 1,
+        );
       }
     });
 

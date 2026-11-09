@@ -334,6 +334,17 @@ const MIGRATIONS: Array<{ version: number; sql: string }> = [
       );
     `,
   },
+  {
+    version: 3,
+    sql: `
+      -- Corrige les plans générés avant le correctif : les exercices de module
+      -- étaient dupliqués pour chaque notion. On conserve la première copie.
+      DELETE FROM exercises
+      WHERE id NOT IN (
+        SELECT MIN(id) FROM exercises GROUP BY course_id, type, prompt
+      );
+    `,
+  },
 ];
 
 export function getDb(): DB {
