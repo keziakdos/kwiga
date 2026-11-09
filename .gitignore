@@ -1,0 +1,33 @@
+node_modules/
+.next/
+out/
+dist/
+.env
+.env.local
+.env*.local
+*.log
+npm-debug.log*
+.DS_Store
+
+# Données privées : jamais versionnées
+/data/
+/uploads/
+backups/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# Couverture / temporaires
+coverage/
+.vitest/
+tmp/
+
+# Données locales de développement / tests
+data-dev/
+data-cli-test/
+.test-data/
+dist/
+
+*.tsbuildinfo

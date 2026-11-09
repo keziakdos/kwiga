@@ -1,0 +1,33 @@
+# Kwiga — déploiement isolé sur un VPS partagé.
+# Le port n'est publié que sur 127.0.0.1 ; Nginx fait le reverse proxy.
+# Aucune exposition publique de la base ni des fichiers.
+
+services:
+  kwiga:
+    image: kwiga:latest
+    container_name: kwiga-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3020:3020"
+    volumes:
+      - kwiga_data:/app/data
+    mem_limit: 384m
+    mem_reservation: 128m
+    cpus: 0.75
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3020/connexion').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  kwiga_data:
+    name: kwiga_data
