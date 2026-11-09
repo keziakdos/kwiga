@@ -8,6 +8,9 @@ import { Diagram } from "@/components/Diagram";
 import { PrintButton } from "@/components/PrintButton";
 import { CheckQuestions } from "@/components/CheckQuestions";
 import { NetworkAnimation } from "@/components/NetworkAnimation";
+import { ImageGallery } from "@/components/ImageGallery";
+import { listNotionImages } from "@/lib/images";
+import { config, imageConfigured } from "@/lib/config";
 import { generateFicheAction } from "@/app/actions/fiche";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +31,7 @@ export default async function FichePage({ params }: { params: Promise<{ id: stri
   if (!notion) notFound();
 
   const saved = getSavedFiche(user.id, nId);
+  const images = saved ? listNotionImages(user.id, nId) : [];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -80,7 +84,11 @@ export default async function FichePage({ params }: { params: Promise<{ id: stri
           updatedAt={saved.updatedAt}
           courseTitle={String(course.title)}
           courseId={courseId}
+          notionId={nId}
           domain={String(course.domain)}
+          images={images}
+          imageConfigured={imageConfigured()}
+          maxImages={config.images.maxPerNotion}
         />
       )}
     </div>
@@ -92,13 +100,21 @@ function FicheView({
   updatedAt,
   courseTitle,
   courseId,
+  notionId,
   domain,
+  images,
+  imageConfigured: imagesConfigured,
+  maxImages,
 }: {
   content: import("@/lib/fiche").FicheContent;
   updatedAt: string;
   courseTitle: string;
   courseId: number;
+  notionId: number;
   domain: string;
+  images: import("@/components/ImageGallery").ImageItem[];
+  imageConfigured: boolean;
+  maxImages: number;
 }) {
   return (
     <article className="paper-surface rounded-3xl border border-paper-line p-8 shadow-card print:border-0 print:shadow-none">
@@ -164,6 +180,14 @@ function FicheView({
           </div>
         </section>
       ) : null}
+
+      <ImageGallery
+        courseId={courseId}
+        notionId={notionId}
+        images={images}
+        configured={imagesConfigured}
+        maxPerNotion={maxImages}
+      />
 
       {content.example ? (
         <section className="mt-4 rounded-xl border border-accent-coral/30 bg-white/70 p-4">

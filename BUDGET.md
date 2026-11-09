@@ -47,6 +47,20 @@ sur-dépenser. Les tarifs sont **configurables** (`AI_PRICE_INPUT_EUR_PER_MTOK`,
 Quand le budget est épuisé : les appels IA sont **bloqués proprement**, mais les cours, documents,
 notes et progression restent accessibles.
 
+## Génération d'images (Google)
+
+Les images sont **facturées à l'unité** (aucun tier gratuit). Modèles Google actuels
+(à revérifier avant activation) :
+
+- `gemini-nano-banana-2.1` : ≈ **0,0336 $** l'image 1K (recommandé) ;
+- `gemini-3.1-flash-lite-image` : le moins cher de la famille ;
+- `gemini-2.5-flash-image` (legacy) : ≈ 0,039 $.
+
+Kwiga réserve `IMAGE_COST_EUR` (par défaut **0,04 €**) sur le budget avant chaque génération,
+puis enregistre une ligne `image_generation` dans `ai_usage`. Le nombre d'images par notion est
+limité (`IMAGE_MAX_PER_NOTION`). Les messages et illustrations gratuit/ payant restent des
+**estimations**, à confronter à la facture Google.
+
 ## Limites anti-dérive
 
 - 3 parcours actifs par personne (configurable).

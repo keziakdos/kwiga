@@ -42,3 +42,14 @@ describe("fiche visuelle", () => {
     expect(saved?.content.keyPoints.length).toBe(content.keyPoints.length);
   });
 });
+
+describe("génération d'images", () => {
+  it("signale clairement que le service n'est pas configuré", async () => {
+    const { imageConfigured } = await import("@/lib/config");
+    const { generateIllustration, ImageNotConfiguredError } = await import("@/lib/images");
+    expect(imageConfigured()).toBe(false);
+    await expect(
+      generateIllustration({ userId: 1, courseId: 1, notion: { id: 1, title: "IP", summary: null } }),
+    ).rejects.toBeInstanceOf(ImageNotConfiguredError);
+  });
+});

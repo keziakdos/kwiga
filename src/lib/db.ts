@@ -370,6 +370,23 @@ const MIGRATIONS: Array<{ version: number; sql: string }> = [
       WHERE status = 'maitrise' AND last_studied_at IS NULL;
     `,
   },
+  {
+    version: 6,
+    sql: `
+      CREATE TABLE IF NOT EXISTS notion_images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        notion_id INTEGER NOT NULL REFERENCES notions(id) ON DELETE CASCADE,
+        storage_path TEXT NOT NULL,
+        mime TEXT NOT NULL DEFAULT 'image/png',
+        prompt TEXT,
+        provider TEXT,
+        model TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_notion_images ON notion_images(user_id, notion_id);
+    `,
+  },
 ];
 
 export function getDb(): DB {

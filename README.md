@@ -24,6 +24,9 @@ n'est fourni par défaut : ils sont créés via la commande d'initialisation sé
   régénérable (« nouvelle explication »), avec schéma explicatif et aperçu des pages du PDF.
 - **Pages sources** : rendu image des pages réelles du PDF (mis en cache), affichage compact et
   dépliable pour ne pas dominer le cours.
+- **Illustrations IA (optionnel)** : génération d'images pédagogiques via Google, galerie persistante,
+  coût réservé sur le budget IA. Désactivé tant que la facturation Google et la configuration ne sont
+  pas en place.
 - **Tuteur textuel** : connaît le parcours, la notion et les documents ; récupération locale des passages
   pertinents (SQLite FTS5), jamais le PDF entier. Distingue document / complément général / incertitude.
 - **Exercices** : QCM, questions ouvertes avec critères, calculs de sous-réseaux, diagnostic. Correction

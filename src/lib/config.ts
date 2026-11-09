@@ -32,6 +32,14 @@ export const config = {
     timeoutMs: int(process.env.AI_TIMEOUT_MS, 60000),
   },
 
+  images: {
+    provider: (process.env.IMAGE_PROVIDER || "null") as "null" | "google",
+    model: process.env.IMAGE_MODEL || "gemini-nano-banana-2.1",
+    apiKey: process.env.IMAGE_API_KEY || process.env.AI_API_KEY || "",
+    costEurPerImage: float(process.env.IMAGE_COST_EUR, 0.04),
+    maxPerNotion: int(process.env.IMAGE_MAX_PER_NOTION, 6),
+  },
+
   limits: {
     maxActiveCourses: int(process.env.MAX_ACTIVE_COURSES, 3),
     maxPdfMb: int(process.env.MAX_PDF_MB, 25),
@@ -43,6 +51,10 @@ export const config = {
     loginWindowMinutes: int(process.env.LOGIN_WINDOW_MINUTES, 15),
   },
 } as const;
+
+export function imageConfigured(): boolean {
+  return config.images.provider !== "null" && config.images.apiKey.length > 0 && config.images.model.length > 0;
+}
 
 export function aiConfigured(): boolean {
   return (
