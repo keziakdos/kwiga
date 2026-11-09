@@ -6,6 +6,8 @@ import { getCourseForUser } from "@/lib/courses";
 import { getSavedFiche } from "@/lib/fiche";
 import { Diagram } from "@/components/Diagram";
 import { PrintButton } from "@/components/PrintButton";
+import { CheckQuestions } from "@/components/CheckQuestions";
+import { NetworkAnimation } from "@/components/NetworkAnimation";
 import { generateFicheAction } from "@/app/actions/fiche";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +48,9 @@ export default async function FichePage({ params }: { params: Promise<{ id: stri
             <input type="hidden" name="variant" value="analogie" />
             <button type="submit" className="btn-ghost px-3 py-1.5 text-xs">Nouvelle explication</button>
           </form>
+          <a href={`/api/fiches/${nId}/download`} className="btn-ghost px-3 py-1.5 text-xs">
+            Télécharger la fiche
+          </a>
           <PrintButton />
         </div>
       </div>
@@ -75,6 +80,7 @@ export default async function FichePage({ params }: { params: Promise<{ id: stri
           updatedAt={saved.updatedAt}
           courseTitle={String(course.title)}
           courseId={courseId}
+          domain={String(course.domain)}
         />
       )}
     </div>
@@ -86,11 +92,13 @@ function FicheView({
   updatedAt,
   courseTitle,
   courseId,
+  domain,
 }: {
   content: import("@/lib/fiche").FicheContent;
   updatedAt: string;
   courseTitle: string;
   courseId: number;
+  domain: string;
 }) {
   return (
     <article className="paper-surface rounded-3xl border border-paper-line p-8 shadow-card print:border-0 print:shadow-none">
@@ -148,6 +156,15 @@ function FicheView({
         </section>
       ) : null}
 
+      {domain === "reseau" ? (
+        <section className="mt-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-board-deep">Schéma animé</h2>
+          <div className="mt-2">
+            <NetworkAnimation title={content.title} />
+          </div>
+        </section>
+      ) : null}
+
       {content.example ? (
         <section className="mt-4 rounded-xl border border-accent-coral/30 bg-white/70 p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-[#a33c22]">Exemple</h2>
@@ -155,16 +172,22 @@ function FicheView({
         </section>
       ) : null}
 
-      {content.checkQuestions.length > 0 ? (
-        <section className="mt-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-board-deep">Vérifier sa compréhension</h2>
-          <ul className="mt-1.5 space-y-1 text-sm leading-relaxed text-ink-soft">
-            {content.checkQuestions.map((q, i) => (
-              <li key={i}>• {q}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {(() => {
+        const items =
+          content.checkItems && content.checkItems.length > 0
+            ? content.checkItems
+            : content.checkQuestions.map((q) => ({ question: q, answer: "" }));
+        if (items.length === 0) return null;
+        return (
+          <section className="mt-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-board-deep">
+              Vérifier sa compréhension
+            </h2>
+            <p className="mt-1 text-xs text-ink-faint">Cliquez sur une question pour afficher la réponse.</p>
+            <CheckQuestions items={items} />
+          </section>
+        );
+      })()}
 
       {content.sources.length > 0 ? (
         <section className="mt-6 border-t border-paper-line pt-4">

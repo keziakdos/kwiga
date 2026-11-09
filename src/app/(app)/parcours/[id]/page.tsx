@@ -6,6 +6,7 @@ import { getCourseForUser } from "@/lib/courses";
 import { getPlanForCourse, type PlanContent } from "@/lib/plans";
 import { computeCourseProgress } from "@/lib/progress";
 import { PdfUploadForm, NotesForm } from "@/components/DocumentForms";
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { archiveCourseAction, deleteCourseAction, generatePlanAction, regeneratePlanAction, validatePlanAction } from "@/app/actions/courses";
 import { deleteDocumentAction } from "@/app/actions/documents";
 import { Badge, ProgressBar, SectionTitle } from "@/components/ui";
@@ -93,6 +94,7 @@ export default async function CoursePage({
         <section className="space-y-6">
           <div className="card p-6">
             <SectionTitle>Documents sources</SectionTitle>
+            <AutoRefresh active={documents.some((d) => d.status === "pending" || d.status === "processing")} />
             {documents.length === 0 ? (
               <p className="text-sm text-ink-soft">Aucun document. Importez un PDF ou collez vos notes ci-contre.</p>
             ) : (

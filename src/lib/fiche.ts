@@ -8,6 +8,8 @@ export type FicheSource = {
   pageNumber: number | null;
 };
 
+export type FicheCheckItem = { question: string; answer: string };
+
 export type FicheContent = {
   title: string;
   intro: string;
@@ -16,6 +18,7 @@ export type FicheContent = {
   example: string;
   diagram: string;
   checkQuestions: string[];
+  checkItems?: FicheCheckItem[];
   sources: FicheSource[];
   aiGenerated: boolean;
   notice?: string;
@@ -64,6 +67,7 @@ function fallbackFiche(notion: NotionRow, chunks: RetrievedChunk[], notice?: str
       `Expliquez « ${notion.title} » avec vos propres mots.`,
       `Donnez un exemple concret de ${notion.title}.`,
     ],
+    checkItems: [],
     sources: sourcesFromChunks(chunks),
     aiGenerated: false,
     notice:
@@ -84,6 +88,19 @@ function sanitizeFiche(raw: unknown, fallback: FicheContent, chunks: RetrievedCh
   const keyPoints = list(r.keyPoints, 7);
   const steps = list(r.steps, 8);
   const checkQuestions = list(r.checkQuestions, 4);
+  const checkItems: FicheCheckItem[] = Array.isArray((r as { checkItems?: unknown }).checkItems)
+    ? ((r as { checkItems?: unknown }).checkItems as unknown[])
+        .map((item) => {
+          if (typeof item === "string") return { question: item, answer: "" };
+          const obj = item as { question?: unknown; answer?: unknown };
+          return {
+            question: String(obj?.question ?? "").trim(),
+            answer: String(obj?.answer ?? "").trim(),
+          };
+        })
+        .filter((item) => item.question)
+        .slice(0, 5)
+    : checkQuestions.map((q) => ({ question: q, answer: "" }));
   const diagram = typeof r.diagram === "string" ? r.diagram.slice(0, 3000) : "";
   return {
     title: typeof r.title === "string" && r.title.trim() ? r.title.trim().slice(0, 160) : fallback.title,
@@ -93,6 +110,10 @@ function sanitizeFiche(raw: unknown, fallback: FicheContent, chunks: RetrievedCh
     example: typeof r.example === "string" ? r.example.slice(0, 1500) : fallback.example,
     diagram: diagram || fallback.diagram,
     checkQuestions: checkQuestions.length > 0 ? checkQuestions : fallback.checkQuestions,
+    checkItems:
+      checkItems.length > 0
+        ? checkItems
+        : fallback.checkQuestions.map((q) => ({ question: q, answer: "" })),
     sources: sourcesFromChunks(chunks),
     aiGenerated: true,
   };
@@ -135,12 +156,12 @@ export async function generateFiche(params: {
 
     const system = `Tu es un professeur de réseaux qui crée une fiche de révision visuelle en français.
 Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour :
-{"title":"...","intro":"...","keyPoints":["..."],"steps":["..."],"example":"...","diagram":"flowchart TD ...","checkQuestions":["..."]}
+{"title":"...","intro":"...","keyPoints":["..."],"steps":["..."],"example":"...","diagram":"flowchart TD ...","checkItems":[{"question":"...","answer":"..."}]}
 Règles :
 - Appuie-toi sur les extraits fournis (documents de l'apprenant) et n'invente ni citation ni numéro de page.
 - Si une information manque, reste général et signale-le brièvement.
-- Le diagramme doit être du Mermaid valide (flowchart, graph ou sequenceDiagram), simple, sans HTML.
-- 3 à 6 points clés, 3 à 7 étapes, 2 à 3 questions de vérification.`;
+- Le diagramme doit être du Mermaid valide (flowchart, graph ou sequenceDiagram), simple, sans HTML, avec des nœuds représentant des ordinateurs, un switch ou un routeur quand c'est pertinent.
+- 3 à 6 points clés, 3 à 7 étapes, 2 à 3 questions de vérification avec une réponse courte et juste.`;
     const user = `Notion : ${params.notion.title}
 Résumé : ${params.notion.summary ?? ""}
 Angle demandé : ${angles[variant]}

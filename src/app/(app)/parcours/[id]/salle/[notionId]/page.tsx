@@ -6,11 +6,13 @@ import { getCourseForUser } from "@/lib/courses";
 import { searchChunks } from "@/lib/rag";
 import { aiConfigured } from "@/lib/ai";
 import { Diagram } from "@/components/Diagram";
+import { NetworkAnimation } from "@/components/NetworkAnimation";
 import { ClassroomLayout } from "@/components/ClassroomLayout";
 import { TutorChat } from "@/components/TutorChat";
 import { NoteEditor } from "@/components/NoteEditor";
 import { markNotionAction } from "@/app/actions/notes";
 import { generateFicheAction } from "@/app/actions/fiche";
+import { getSavedFiche } from "@/lib/fiche";
 import { Badge } from "@/components/ui";
 import { statusLabel } from "@/lib/validation";
 
@@ -88,6 +90,8 @@ export default async function ClassroomPage({
       : undefined,
   }));
 
+  const savedFiche = getSavedFiche(user.id, nId);
+
   const references = searchChunks({
     userId: user.id,
     courseId,
@@ -141,6 +145,17 @@ export default async function ClassroomPage({
           </section>
         ) : null}
 
+        {course.domain === "reseau" ? (
+          <section className="mt-5">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
+              Schéma animé pas à pas
+            </h2>
+            <div className="mt-2">
+              <NetworkAnimation title={String(notion.title)} />
+            </div>
+          </section>
+        ) : null}
+
         <div className="mt-6 flex flex-wrap gap-2">
           <form action={markNotionAction}>
             <input type="hidden" name="notion_id" value={nId} />
@@ -154,14 +169,33 @@ export default async function ClassroomPage({
             <input type="hidden" name="action" value="a_revoir" />
             <button className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20" type="submit">À revoir</button>
           </form>
-          <form action={generateFicheAction}>
-            <input type="hidden" name="course_id" value={courseId} />
-            <input type="hidden" name="notion_id" value={nId} />
-            <input type="hidden" name="variant" value="standard" />
-            <button type="submit" className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20">
-              Créer une fiche visuelle
-            </button>
-          </form>
+          {savedFiche ? (
+            <>
+              <Link
+                href={`/parcours/${courseId}/salle/${nId}/fiche`}
+                className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20"
+              >
+                Voir la fiche enregistrée
+              </Link>
+              <form action={generateFicheAction}>
+                <input type="hidden" name="course_id" value={courseId} />
+                <input type="hidden" name="notion_id" value={nId} />
+                <input type="hidden" name="variant" value="standard" />
+                <button type="submit" className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20">
+                  Régénérer la fiche
+                </button>
+              </form>
+            </>
+          ) : (
+            <form action={generateFicheAction}>
+              <input type="hidden" name="course_id" value={courseId} />
+              <input type="hidden" name="notion_id" value={nId} />
+              <input type="hidden" name="variant" value="standard" />
+              <button type="submit" className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20">
+                Créer une fiche visuelle
+              </button>
+            </form>
+          )}
         </div>
 
         {attemptCount.n > 0 && currentStatus === "non_commence" ? (
