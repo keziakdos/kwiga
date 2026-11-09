@@ -34,6 +34,9 @@ COPY --from=builder --chown=kwiga:kwiga /app/public ./public
 COPY --from=builder --chown=kwiga:kwiga /app/dist/cli ./dist/cli
 COPY --from=builder --chown=kwiga:kwiga /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
 COPY --from=builder --chown=kwiga:kwiga /app/node_modules/@node-rs ./node_modules/@node-rs
+# pdf.js charge @napi-rs/canvas et son worker dynamiquement : non tracés par Next standalone.
+COPY --from=builder --chown=kwiga:kwiga /app/node_modules/@napi-rs ./node_modules/@napi-rs
+COPY --from=builder --chown=kwiga:kwiga /app/node_modules/pdfjs-dist ./node_modules/pdfjs-dist
 
 USER kwiga
 EXPOSE 3020
