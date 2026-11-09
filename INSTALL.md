@@ -97,8 +97,10 @@ AI_PRICE_OUTPUT_EUR_PER_MTOK=0
 AI_PROVIDER=google
 AI_MODEL=gemini-3.5-flash-lite
 AI_API_KEY=...
-AI_PRICE_INPUT_EUR_PER_MTOK=0.09
-AI_PRICE_OUTPUT_EUR_PER_MTOK=0.36
+# Tier gratuit : 0. Pour un compte payant, Gemini 3.5 Flash-Lite coûte
+# 0,30 $/M en entrée et 2,50 $/M en sortie (≈ 0,28 € et 2,30 € au taux du 09/11/2026).
+AI_PRICE_INPUT_EUR_PER_MTOK=0
+AI_PRICE_OUTPUT_EUR_PER_MTOK=0
 ```
 
 Les noms de modèles, tarifs et conditions de rétention **changent** : vérifiez les pages officielles
