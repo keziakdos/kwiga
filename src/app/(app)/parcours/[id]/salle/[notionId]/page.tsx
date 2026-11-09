@@ -7,8 +7,8 @@ import { searchChunks } from "@/lib/rag";
 import { aiConfigured } from "@/lib/ai";
 import { Diagram } from "@/components/Diagram";
 import { NetworkAnimation } from "@/components/NetworkAnimation";
-import { ZoomableImage } from "@/components/ZoomableImage";
 import { SchemaPrompt } from "@/components/SchemaPrompt";
+import { getAnimationOutline } from "@/lib/animations";
 import { imageConfigured } from "@/lib/config";
 import { ClassroomLayout } from "@/components/ClassroomLayout";
 import { TutorChat } from "@/components/TutorChat";
@@ -102,7 +102,9 @@ export default async function ClassroomPage({
     limit: 5,
   });
 
-  const chapterFigure = references.find((r) => r.pageNumber) ?? null;
+  const animationContext = [notion.summary, notion.explanation, notion.example].filter(Boolean).join(" ");
+  const animationOutline = getAnimationOutline(String(notion.title), animationContext);
+  const courseDomainReseau = course.domain === "reseau";
 
   const notionIndex = allNotions.findIndex((n) => n.id === nId);
   const prev = notionIndex > 0 ? allNotions[notionIndex - 1] : null;
@@ -150,38 +152,21 @@ export default async function ClassroomPage({
           </section>
         ) : null}
 
-        {course.domain === "reseau" ? (
+        {courseDomainReseau ? (
           <section className="mt-5">
             <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
-              Schéma animé pas à pas
+              Schéma animé — {animationOutline.caption}
             </h2>
-            {chapterFigure ? (
-              <div className="mt-2 space-y-2">
-                <ZoomableImage
-                  src={`/api/documents/${chapterFigure.documentId}/page-image?page=${chapterFigure.pageNumber}`}
-                  alt={`Figure du chapitre — ${chapterFigure.documentName}, page ${chapterFigure.pageNumber}`}
-                  caption={`Figure du chapitre : ${chapterFigure.documentName}, page ${chapterFigure.pageNumber}`}
-                  className="max-h-80"
-                />
-                <p className="text-xs text-white/60">
-                  Le schéma animé ci-dessous explique le mécanisme de cette figure du document.
-                </p>
-              </div>
-            ) : (
-              <p className="mt-2 text-xs text-white/50">
-                Aucune figure de page n&apos;est disponible pour cette notion ; le schéma animé reste
-                une explication générale.
-              </p>
-            )}
+            <p className="mt-1 text-xs text-white/50">
+              Construit à partir du chapitre en cours ({animationOutline.steps.length} étapes), sans
+              dépendre d&apos;une image du PDF.
+            </p>
             <div className="mt-2">
-              <NetworkAnimation
-                title={String(notion.title)}
-                context={[notion.summary, notion.explanation, notion.example].filter(Boolean).join(" ")}
-              />
+              <NetworkAnimation title={String(notion.title)} context={animationContext} />
             </div>
             <SchemaPrompt
               title={String(notion.title)}
-              context={[notion.summary, notion.explanation, notion.example].filter(Boolean).join(" ")}
+              context={animationContext}
               courseId={courseId}
               notionId={nId}
               configured={imageConfigured()}

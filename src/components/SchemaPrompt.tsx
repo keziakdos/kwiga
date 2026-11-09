@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getAnimationOutline } from "@/components/NetworkAnimation";
+import { getAnimationOutline } from "@/lib/animations";
 import { generateImageDirectAction } from "@/app/actions/visual";
 import { ZoomableImage } from "@/components/ZoomableImage";
 
