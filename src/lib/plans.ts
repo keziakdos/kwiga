@@ -440,21 +440,69 @@ export function materializePlan(courseId: number, planId: number, content: PlanC
   tx.immediate();
 }
 
-export function extractDocumentContext(courseId: number, userId: number, maxChars = 12000): string {
+/**
+ * Construit un aperçu représentatif de TOUT le document (et non des premiers
+ * morceaux) : un extrait par page, échantillonné régulièrement sur l'ensemble
+ * du PDF, puis réparti entre les documents du parcours.
+ */
+export function extractDocumentContext(courseId: number, userId: number, maxChars = 16000): string {
   const db = getDb();
-  const rows = db
+  const docs = db
     .prepare(
-      `SELECT dc.content FROM document_chunks dc
-       JOIN documents d ON d.id = dc.document_id
-       WHERE d.course_id = ? AND d.user_id = ? AND d.status = 'done'
-       ORDER BY d.id, dc.seq
-       LIMIT 40`,
+      `SELECT id, original_name, kind FROM documents
+       WHERE course_id = ? AND user_id = ? AND status = 'done' ORDER BY id`,
     )
-    .all(courseId, userId) as Array<{ content: string }>;
+    .all(courseId, userId) as Array<{ id: number; original_name: string; kind: "pdf" | "notes" }>;
+  if (docs.length === 0) return "";
+
+  const perDocBudget = Math.max(1500, Math.floor(maxChars / docs.length));
+  const parts: string[] = [];
+
+  for (const doc of docs) {
+    const docParts: string[] = [];
+    let used = 0;
+
+    if (doc.kind === "pdf") {
+      const pages = db
+        .prepare("SELECT page_number, content FROM document_pages WHERE document_id = ? ORDER BY page_number")
+        .all(doc.id) as Array<{ page_number: number; content: string }>;
+      if (pages.length > 0) {
+        const maxSamples = 60;
+        const stride = Math.max(1, Math.ceil(pages.length / maxSamples));
+        for (let i = 0; i < pages.length; i += stride) {
+          const page = pages[i];
+          const excerpt = page.content.replace(/\s+/g, " ").slice(0, 340);
+          if (!excerpt) continue;
+          const block = `### ${doc.original_name} — page ${page.page_number}\n${excerpt}`;
+          if (used + block.length > perDocBudget) break;
+          docParts.push(block);
+          used += block.length;
+        }
+      }
+    } else {
+      const chunks = db
+        .prepare("SELECT content FROM document_chunks WHERE document_id = ? ORDER BY seq")
+        .all(doc.id) as Array<{ content: string }>;
+      const stride = Math.max(1, Math.ceil(chunks.length / 24));
+      for (let i = 0; i < chunks.length; i += stride) {
+        const excerpt = chunks[i].content.replace(/\s+/g, " ").slice(0, 480);
+        if (!excerpt) continue;
+        const block = `### ${doc.original_name} — section de notes\n${excerpt}`;
+        if (used + block.length > perDocBudget) break;
+        docParts.push(block);
+        used += block.length;
+      }
+    }
+
+    if (docParts.length > 0) {
+      parts.push(`## Document : ${doc.original_name}\n\n${docParts.join("\n\n")}`);
+    }
+  }
+
   let out = "";
-  for (const row of rows) {
-    if ((out + row.content).length > maxChars) break;
-    out += row.content + "\n\n---\n\n";
+  for (const part of parts) {
+    if (out.length + part.length + 4 > maxChars) break;
+    out += part + "\n\n";
   }
   return out;
 }

@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { submitAttempt, getExerciseForUser, getBestAttempt } from "@/lib/exercises";
 import { getCourseForUser } from "@/lib/courses";
+import { setNotionStatus } from "@/lib/progress";
 
 const db = () => getDb();
 
@@ -48,6 +49,7 @@ describe("exercices et maîtrise", () => {
       .run(courseId, notionId, JSON.stringify(["Couche 2", "Couche 3"]), JSON.stringify("Couche 3"));
     const exerciseId = Number(res.lastInsertRowid);
 
+    setNotionStatus(userId, notionId, "etudie");
     const { result } = await submitAttempt({ userId, exerciseId, answer: "Couche 3" });
     expect(result.graded).toBe(true);
     expect(result.score).toBe(1);
@@ -68,6 +70,7 @@ describe("exercices et maîtrise", () => {
       )
       .run(courseId, notionId, JSON.stringify("30"));
     const exerciseId = Number(res.lastInsertRowid);
+    setNotionStatus(userId, notionId, "etudie");
     const { result } = await submitAttempt({ userId, exerciseId, answer: "30" });
     expect(result.graded).toBe(true);
     expect(result.score).toBe(2);
@@ -87,6 +90,22 @@ describe("exercices et maîtrise", () => {
     expect(result.graded).toBe(false);
     const progress = db().prepare("SELECT COUNT(*) AS n FROM notion_progress WHERE user_id = ? AND notion_id = ?").get(userId, notionId) as { n: number };
     expect(progress.n).toBe(0);
+  });
+
+  it("ne valide pas la maîtrise sans étude préalable de la notion", async () => {
+    const userId = await makeUser("exoSansLecture");
+    const courseId = makeCourse(userId);
+    const notionId = makeNotion(courseId);
+    const res = db()
+      .prepare(
+        "INSERT INTO exercises (course_id, notion_id, type, prompt, options_json, correct_json, points) VALUES (?, ?, 'qcm', 'Q ?', ?, ?, 1)",
+      )
+      .run(courseId, notionId, JSON.stringify(["a", "b"]), JSON.stringify("a"));
+    const exerciseId = Number(res.lastInsertRowid);
+    const { result } = await submitAttempt({ userId, exerciseId, answer: "a" });
+    expect(result.score).toBe(1);
+    const progress = db().prepare("SELECT status FROM notion_progress WHERE user_id = ? AND notion_id = ?").get(userId, notionId) as { status: string } | undefined;
+    expect(progress?.status).not.toBe("maitrise");
   });
 
   it("isole les exercices entre utilisateurs", async () => {
@@ -115,6 +134,7 @@ describe("meilleure tentative et maîtrise", () => {
       )
       .run(courseId, notionId, JSON.stringify(["a", "b"]), JSON.stringify("a"));
     const exerciseId = Number(res.lastInsertRowid);
+    setNotionStatus(userId, notionId, "etudie");
     await submitAttempt({ userId, exerciseId, answer: "b" });
     await submitAttempt({ userId, exerciseId, answer: "a" });
     const progress = db().prepare("SELECT status, mastery_score FROM notion_progress WHERE user_id = ? AND notion_id = ?").get(userId, notionId) as { status: string; mastery_score: number };

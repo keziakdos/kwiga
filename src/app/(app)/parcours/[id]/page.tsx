@@ -233,6 +233,19 @@ export default async function CoursePage({
                   <Link href={`/parcours/${courseId}/exercices`} className="btn-ghost">Exercices</Link>
                   <Link href={`/parcours/${courseId}/progression`} className="btn-ghost">Progression</Link>
                 </div>
+                <details className="mt-3 text-xs text-ink-soft">
+                  <summary className="cursor-pointer text-board-deep">Relancer l&apos;analyse du document</summary>
+                  <p className="mt-2 rounded-lg bg-accent-yellow/15 px-3 py-2 text-[#7a5b00]">
+                    Utile si le plan a ignoré des pages ou des sujets. Attention : un nouveau plan remplace
+                    les notions actuelles et réinitialise la progression de ce parcours.
+                  </p>
+                  <form action={regeneratePlanAction} className="mt-2">
+                    <input type="hidden" name="course_id" value={courseId} />
+                    <button type="submit" className="btn-ghost px-3 py-1.5 text-xs">
+                      Générer un nouveau plan
+                    </button>
+                  </form>
+                </details>
               </div>
             )}
           </div>

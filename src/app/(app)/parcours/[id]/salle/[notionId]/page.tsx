@@ -10,6 +10,7 @@ import { ClassroomLayout } from "@/components/ClassroomLayout";
 import { TutorChat } from "@/components/TutorChat";
 import { NoteEditor } from "@/components/NoteEditor";
 import { markNotionAction } from "@/app/actions/notes";
+import { generateFicheAction } from "@/app/actions/fiche";
 import { Badge } from "@/components/ui";
 import { statusLabel } from "@/lib/validation";
 
@@ -62,6 +63,14 @@ export default async function ClassroomPage({
   const noteRow = db
     .prepare("SELECT content FROM notion_notes WHERE user_id = ? AND notion_id = ?")
     .get(user.id, nId) as { content: string } | undefined;
+
+  const attemptCount = db
+    .prepare(
+      `SELECT COUNT(*) AS n FROM exercise_attempts ea
+       JOIN exercises e ON e.id = ea.exercise_id
+       WHERE ea.user_id = ? AND e.notion_id = ?`,
+    )
+    .get(user.id, nId) as { n: number };
 
   const chatMessages = (
     db
@@ -145,16 +154,28 @@ export default async function ClassroomPage({
             <input type="hidden" name="action" value="a_revoir" />
             <button className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20" type="submit">À revoir</button>
           </form>
-          <Link
-            href={`/parcours/${courseId}/salle/${nId}/fiche`}
-            className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20"
-          >
-            Créer une fiche visuelle
-          </Link>
+          <form action={generateFicheAction}>
+            <input type="hidden" name="course_id" value={courseId} />
+            <input type="hidden" name="notion_id" value={nId} />
+            <input type="hidden" name="variant" value="standard" />
+            <button type="submit" className="btn border border-white/25 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20">
+              Créer une fiche visuelle
+            </button>
+          </form>
         </div>
 
-        <section className="mt-7 border-t border-white/15 pt-5">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">Références documentaires</h2>
+        {attemptCount.n > 0 && currentStatus === "non_commence" ? (
+          <p className="mt-4 rounded-xl bg-accent-yellow/15 px-3.5 py-2.5 text-xs leading-relaxed text-accent-yellow">
+            Des évaluations sont enregistrées pour cette notion, mais elle n&apos;est pas marquée comme
+            étudiée. La maîtrise n&apos;est validée qu&apos;après avoir étudié la notion : utilisez
+            « Marquer comme étudié ».
+          </p>
+        ) : null}
+
+        <details className="mt-7 border-t border-white/15 pt-4">
+          <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-white/50 hover:text-white/70">
+            Pages du document ({references.length})
+          </summary>
           {references.length === 0 ? (
             <p className="mt-2 text-sm text-white/60">
               Aucune référence trouvée dans vos documents pour cette notion. Les compléments du tuteur
@@ -163,26 +184,44 @@ export default async function ClassroomPage({
           ) : (
             <ul className="mt-3 space-y-2.5">
               {references.map((r) => (
-                <li key={r.chunkId} className="rounded-xl bg-white/8 p-3.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span className="font-medium text-white/90">{r.documentName}</span>
+                <li key={r.chunkId} className="rounded-xl bg-white/8 p-3">
+                  <div className="flex gap-3">
                     {r.pageNumber ? (
                       <Link
-                        className="rounded-full bg-accent-yellow/20 px-2 py-0.5 text-accent-yellow hover:bg-accent-yellow/30"
                         href={`/parcours/${courseId}/documents/${r.documentId}?page=${r.pageNumber}`}
+                        className="shrink-0 overflow-hidden rounded-lg border border-white/15"
                       >
-                        page {r.pageNumber}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/api/documents/${r.documentId}/page-image?page=${r.pageNumber}`}
+                          alt={`${r.documentName} — page ${r.pageNumber}`}
+                          className="h-20 w-16 object-cover object-top"
+                          loading="lazy"
+                        />
                       </Link>
-                    ) : (
-                      <span className="text-white/50">section de notes</span>
-                    )}
+                    ) : null}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <span className="font-medium text-white/90">{r.documentName}</span>
+                        {r.pageNumber ? (
+                          <Link
+                            className="rounded-full bg-accent-yellow/20 px-2 py-0.5 text-accent-yellow hover:bg-accent-yellow/30"
+                            href={`/parcours/${courseId}/documents/${r.documentId}?page=${r.pageNumber}`}
+                          >
+                            page {r.pageNumber}
+                          </Link>
+                        ) : (
+                          <span className="text-white/50">section de notes</span>
+                        )}
+                      </div>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/65">{r.content}</p>
+                    </div>
                   </div>
-                  <p className="mt-1.5 line-clamp-4 text-xs leading-relaxed text-white/65">{r.content}</p>
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </details>
 
         <div className="mt-7 flex items-center justify-between gap-3 text-sm">
           {prev ? (

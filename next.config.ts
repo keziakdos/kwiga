@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     // 30 Mo couvre la limite applicative de 25 Mo + l'encodage multipart.
     serverActions: { bodySizeLimit: "30mb" },
   },
-  serverExternalPackages: ["better-sqlite3", "@node-rs/argon2", "pdfjs-dist"],
+  serverExternalPackages: ["better-sqlite3", "@node-rs/argon2", "pdfjs-dist", "@napi-rs/canvas"],
   async headers() {
     return [
       {

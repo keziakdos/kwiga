@@ -49,3 +49,23 @@ describe("matérialisation du plan", () => {
     expect(exercises.n).toBe(1);
   });
 });
+
+describe("analyse du document", () => {
+  it("échantillonne toutes les pages, y compris les dernières", async () => {
+    const { extractDocumentContext } = await import("@/lib/plans");
+    const userId = await makeUser("scan");
+    const courseId = createCourse({ userId, title: "Scan", domain: "reseau", level: "debutant", goal: "Objectif de test" });
+    const doc = db()
+      .prepare("INSERT INTO documents (user_id, course_id, kind, original_name, mime, size_bytes, status) VALUES (?, ?, 'pdf', 'long.pdf', 'application/pdf', 1000, 'done')")
+      .run(userId, courseId);
+    const documentId = Number(doc.lastInsertRowid);
+    const insert = db().prepare("INSERT INTO document_pages (document_id, page_number, content) VALUES (?, ?, ?)");
+    for (let p = 1; p <= 60; p++) {
+      insert.run(documentId, p, `Contenu de la page ${p} sur les réseaux et protocoles.`);
+    }
+    const context = extractDocumentContext(courseId, userId, 16000);
+    expect(context).toContain("page 60");
+    expect(context).toContain("page 1 ");
+    expect(context.length).toBeLessThanOrEqual(16000);
+  });
+});

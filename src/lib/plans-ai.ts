@@ -31,6 +31,13 @@ function sanitizePlan(raw: unknown, fallback: PlanContent): PlanContent {
           explanation: n.explanation ? String(n.explanation).slice(0, 3000) : undefined,
           example: n.example ? String(n.example).slice(0, 1500) : undefined,
           diagram: n.diagram ? String(n.diagram).slice(0, 2000) : undefined,
+          references: Array.isArray((n as { pages?: unknown }).pages)
+            ? ((n as { pages?: unknown }).pages as unknown[])
+                .map((p) => Number(p))
+                .filter((p) => Number.isFinite(p) && p > 0)
+                .slice(0, 12)
+                .map((p) => `page ${p}`)
+            : undefined,
         })),
       exercises: Array.isArray(m.exercises)
         ? (m.exercises as Array<Record<string, unknown>>)
@@ -95,8 +102,11 @@ export async function generatePlan(params: {
   const system = `Tu es un ingénieur pédagogique réseaux. Tu construis un plan d'apprentissage en français à partir des documents de l'apprenant.
 Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, au format :
 {"prerequisites":["..."],"order":"...","modules":[{"title":"Module 1 — ...","description":"...","notions":[{"title":"...","summary":"...","explanation":"...","example":"...","diagram":"mermaid ou vide"}],"exercises":[{"type":"qcm|open|subnet|topology|troubleshooting|lab","prompt":"...","options":["..."],"correct":"...","criteria":"...","points":1}]}]}
-Contraintes : 3 à 6 modules, 2 à 4 notions par module, contenu technique exact, français simple, adapté au niveau indiqué, appuyé sur les extraits fournis.
-Ne jamais inventer de citation ni de numéro de page.`;
+Contraintes :
+- Couvre TOUS les thèmes majeurs présents dans les extraits fournis, sans en ignorer. Adapte le nombre de modules à la richesse du document (3 à 8 modules).
+- Chaque notion doit inclure un champ "pages": [numéros de page réellement utilisés dans les extraits], ou [] si l'information vient de connaissances générales.
+- 2 à 4 notions par module, contenu technique exact, français simple, adapté au niveau indiqué, appuyé sur les extraits fournis.
+- Ne jamais inventer de citation ni de numéro de page.`;
 
   const user = `Parcours : ${params.title}
 Domaine : ${params.domain}

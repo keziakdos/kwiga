@@ -345,6 +345,31 @@ const MIGRATIONS: Array<{ version: number; sql: string }> = [
       );
     `,
   },
+  {
+    version: 4,
+    sql: `
+      CREATE TABLE IF NOT EXISTS notion_fiches (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        notion_id INTEGER NOT NULL REFERENCES notions(id) ON DELETE CASCADE,
+        content_json TEXT NOT NULL,
+        ai_generated INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(user_id, notion_id)
+      );
+    `,
+  },
+  {
+    version: 5,
+    sql: `
+      -- Une notion ne peut être maîtrisée sans étude préalable. On annule les
+      -- maîtrises attribuées sans aucune trace d'étude (ancienne logique).
+      UPDATE notion_progress
+      SET status = 'non_commence', mastery_score = 0
+      WHERE status = 'maitrise' AND last_studied_at IS NULL;
+    `,
+  },
 ];
 
 export function getDb(): DB {

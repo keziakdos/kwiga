@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { recordActivity } from "@/lib/progress";
+import { recordActivity, recomputeNotionMastery } from "@/lib/progress";
 
 export type NoteState = { ok: boolean; message?: string; error?: string };
 
@@ -62,6 +62,8 @@ export async function markNotionAction(formData: FormData) {
        VALUES (?, ?, 'etudie', datetime('now'), datetime('now'))
        ON CONFLICT(user_id, notion_id) DO UPDATE SET status = 'etudie', updated_at = datetime('now')`,
     ).run(user.id, notionId);
+    // Si des évaluations existaient déjà, la maîtrise peut maintenant être calculée.
+    recomputeNotionMastery(user.id, notionId);
   }
   recordActivity({ userId: user.id, courseId, notionId, type: "notion", label: "Statut de la notion mis à jour" });
   revalidatePath(`/parcours/${courseId}/salle/${notionId}`);

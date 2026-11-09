@@ -16,14 +16,15 @@ export function recordActivity(params: {
 }
 
 export function touchNotionStudy(userId: number, notionId: number) {
+  // Trace la dernière consultation sans valider l'étude : seule une action
+  // explicite (« Marquer comme étudié ») permet ensuite la maîtrise.
   const db = getDb();
   db.prepare(
     `INSERT INTO notion_progress (user_id, notion_id, status, last_studied_at, updated_at)
-     VALUES (?, ?, 'etudie', datetime('now'), datetime('now'))
+     VALUES (?, ?, 'non_commence', datetime('now'), datetime('now'))
      ON CONFLICT(user_id, notion_id) DO UPDATE SET
        last_studied_at = datetime('now'),
-       updated_at = datetime('now'),
-       status = CASE WHEN notion_progress.status = 'non_commence' THEN 'etudie' ELSE notion_progress.status END`,
+       updated_at = datetime('now')`,
   ).run(userId, notionId);
 }
 
@@ -38,6 +39,13 @@ export function setNotionStatus(userId: number, notionId: number, status: Notion
 
 export function recomputeNotionMastery(userId: number, notionId: number) {
   const db = getDb();
+  const existing = db
+    .prepare("SELECT status FROM notion_progress WHERE user_id = ? AND notion_id = ?")
+    .get(userId, notionId) as { status: string } | undefined;
+  // Une évaluation ne peut valider une notion que si l'apprenant l'a étudiée.
+  const studied = existing && ["etudie", "a_revoir", "maitrise"].includes(existing.status);
+  if (!studied) return;
+
   const row = db
     .prepare(
       `SELECT COALESCE(SUM(best_score), 0) AS score, COALESCE(SUM(best_max), 0) AS max

@@ -80,6 +80,16 @@ export default async function DocumentViewerPage({
                 ) : null}
               </div>
             </div>
+            {doc.kind === "pdf" ? (
+              <div className="mt-4 overflow-hidden rounded-xl border border-ink/10 bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/documents/${doc.id}/page-image?page=${current}`}
+                  alt={`${String(doc.original_name)} — page ${current}`}
+                  className="w-full"
+                />
+              </div>
+            ) : null}
             <article className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ink-soft">
               {pageContent || "Page vide ou sans texte exploitable."}
             </article>

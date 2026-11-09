@@ -20,6 +20,10 @@ n'est fourni par défaut : ils sont créés via la commande d'initialisation sé
   Extraction **page par page**, statuts `en attente / en cours / terminé / erreur`, détection des PDF
   scannés sans OCR.
 - **Salle de classe** : tableau vert profond, cahier crème, onglets sur mobile, schémas Mermaid.
+- **Fiche visuelle persistante** : générée depuis les documents, enregistrée pour ne pas être recréée,
+  régénérable (« nouvelle explication »), avec schéma explicatif et aperçu des pages du PDF.
+- **Pages sources** : rendu image des pages réelles du PDF (mis en cache), affichage compact et
+  dépliable pour ne pas dominer le cours.
 - **Tuteur textuel** : connaît le parcours, la notion et les documents ; récupération locale des passages
   pertinents (SQLite FTS5), jamais le PDF entier. Distingue document / complément général / incertitude.
 - **Exercices** : QCM, questions ouvertes avec critères, calculs de sous-réseaux, diagnostic. Correction
