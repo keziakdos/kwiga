@@ -9,6 +9,7 @@ import { PrintButton } from "@/components/PrintButton";
 import { CheckQuestions } from "@/components/CheckQuestions";
 import { NetworkAnimation } from "@/components/NetworkAnimation";
 import { ImageGallery } from "@/components/ImageGallery";
+import { ZoomableImage } from "@/components/ZoomableImage";
 import { listNotionImages } from "@/lib/images";
 import { config, imageConfigured } from "@/lib/config";
 import { generateFicheAction } from "@/app/actions/fiche";
@@ -175,6 +176,23 @@ function FicheView({
       {domain === "reseau" ? (
         <section className="mt-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-board-deep">Schéma animé</h2>
+          {(() => {
+            const figure = content.sources.find((s) => s.pageNumber);
+            if (!figure) return null;
+            return (
+              <div className="mt-2 space-y-2">
+                <ZoomableImage
+                  src={`/api/documents/${figure.documentId}/page-image?page=${figure.pageNumber}`}
+                  alt={`Figure du chapitre — ${figure.documentName}, page ${figure.pageNumber}`}
+                  caption={`Figure du chapitre : ${figure.documentName}, page ${figure.pageNumber}`}
+                  className="max-h-80"
+                />
+                <p className="text-xs text-ink-faint">
+                  Le schéma animé ci-dessous explique le mécanisme de cette figure du document.
+                </p>
+              </div>
+            );
+          })()}
           <div className="mt-2">
             <NetworkAnimation
               title={content.title}

@@ -7,6 +7,7 @@ import { searchChunks } from "@/lib/rag";
 import { aiConfigured } from "@/lib/ai";
 import { Diagram } from "@/components/Diagram";
 import { NetworkAnimation } from "@/components/NetworkAnimation";
+import { ZoomableImage } from "@/components/ZoomableImage";
 import { ClassroomLayout } from "@/components/ClassroomLayout";
 import { TutorChat } from "@/components/TutorChat";
 import { NoteEditor } from "@/components/NoteEditor";
@@ -99,6 +100,8 @@ export default async function ClassroomPage({
     limit: 5,
   });
 
+  const chapterFigure = references.find((r) => r.pageNumber) ?? null;
+
   const notionIndex = allNotions.findIndex((n) => n.id === nId);
   const prev = notionIndex > 0 ? allNotions[notionIndex - 1] : null;
   const next = notionIndex >= 0 && notionIndex < allNotions.length - 1 ? allNotions[notionIndex + 1] : null;
@@ -150,6 +153,24 @@ export default async function ClassroomPage({
             <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
               Schéma animé pas à pas
             </h2>
+            {chapterFigure ? (
+              <div className="mt-2 space-y-2">
+                <ZoomableImage
+                  src={`/api/documents/${chapterFigure.documentId}/page-image?page=${chapterFigure.pageNumber}`}
+                  alt={`Figure du chapitre — ${chapterFigure.documentName}, page ${chapterFigure.pageNumber}`}
+                  caption={`Figure du chapitre : ${chapterFigure.documentName}, page ${chapterFigure.pageNumber}`}
+                  className="max-h-80"
+                />
+                <p className="text-xs text-white/60">
+                  Le schéma animé ci-dessous explique le mécanisme de cette figure du document.
+                </p>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-white/50">
+                Aucune figure de page n&apos;est disponible pour cette notion ; le schéma animé reste
+                une explication générale.
+              </p>
+            )}
             <div className="mt-2">
               <NetworkAnimation
                 title={String(notion.title)}
