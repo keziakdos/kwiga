@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { legal, isLegalConfigured } from "@/lib/legal";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Mentions légales — Kwiga" };
 
 export default function MentionsLegalesPage() {

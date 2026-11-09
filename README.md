@@ -93,6 +93,11 @@ deploy/             vhost Nginx de référence
 
 ## État actuel
 
-Le MVP est **développé et testé en local**. Il n'a **pas** été déployé sur le VPS à ce stade :
-le déploiement suit `DEPLOY.md` et nécessite une validation explicite avant toute modification du
-proxy ou du serveur.
+MVP **déployé** sur https://kwiga.rwazap.com (conteneur `kwiga-app`, port local `3020`, Nginx + HTTPS
+Let's Encrypt). Vérifications effectuées le 9 novembre 2026 : pages publiques et privées, redirection
+anonyme, refus des API, comptes `Keziakdos` (admin) et `didioos` (apprenant), sites préexistants
+intacts.
+
+Le tuteur IA est actuellement **non configuré** (`AI_PROVIDER=null`) : l'application affiche cet état
+et les cours restent accessibles. La configuration IA et la sauvegarde planifiée sont les prochaines
+étapes d'exploitation.

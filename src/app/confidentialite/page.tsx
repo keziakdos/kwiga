@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { legal } from "@/lib/legal";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Confidentialité — Kwiga" };
 
 export default function ConfidentialitePage() {
