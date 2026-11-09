@@ -103,3 +103,22 @@ describe("exercices et maîtrise", () => {
     expect(getCourseForUser(courseId, b)).toBeNull();
   });
 });
+
+describe("meilleure tentative et maîtrise", () => {
+  it("utilise la meilleure tentative corrigée, pas la moyenne des essais", async () => {
+    const userId = await makeUser("exoBest");
+    const courseId = makeCourse(userId);
+    const notionId = makeNotion(courseId);
+    const res = db()
+      .prepare(
+        "INSERT INTO exercises (course_id, notion_id, type, prompt, options_json, correct_json, points) VALUES (?, ?, 'qcm', 'Q ?', ?, ?, 2)",
+      )
+      .run(courseId, notionId, JSON.stringify(["a", "b"]), JSON.stringify("a"));
+    const exerciseId = Number(res.lastInsertRowid);
+    await submitAttempt({ userId, exerciseId, answer: "b" });
+    await submitAttempt({ userId, exerciseId, answer: "a" });
+    const progress = db().prepare("SELECT status, mastery_score FROM notion_progress WHERE user_id = ? AND notion_id = ?").get(userId, notionId) as { status: string; mastery_score: number };
+    expect(progress.status).toBe("maitrise");
+    expect(progress.mastery_score).toBeCloseTo(1, 3);
+  });
+});

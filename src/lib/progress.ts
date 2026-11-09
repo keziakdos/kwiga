@@ -40,10 +40,14 @@ export function recomputeNotionMastery(userId: number, notionId: number) {
   const db = getDb();
   const row = db
     .prepare(
-      `SELECT COALESCE(SUM(score), 0) AS score, COALESCE(SUM(max_score), 0) AS max
-       FROM exercise_attempts
-       WHERE user_id = ? AND ai_graded = 1
-         AND exercise_id IN (SELECT id FROM exercises WHERE notion_id = ?)`,
+      `SELECT COALESCE(SUM(best_score), 0) AS score, COALESCE(SUM(best_max), 0) AS max
+       FROM (
+         SELECT MAX(score) AS best_score, MAX(max_score) AS best_max
+         FROM exercise_attempts
+         WHERE user_id = ? AND ai_graded = 1
+           AND exercise_id IN (SELECT id FROM exercises WHERE notion_id = ?)
+         GROUP BY exercise_id
+       )`,
     )
     .get(userId, notionId) as { score: number; max: number };
 
