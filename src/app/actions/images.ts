@@ -7,7 +7,7 @@ import { generateIllustration, deleteNotionImage, ImageNotConfiguredError, Image
 import { BudgetError } from "@/lib/budget";
 import { recordActivity } from "@/lib/progress";
 
-export type ImageState = { ok: boolean; error?: string; message?: string };
+export type ImageState = { ok: boolean; error?: string; message?: string; image?: { id: number; url: string } };
 
 export async function generateImageAction(_prev: ImageState, formData: FormData): Promise<ImageState> {
   const user = await requireUser();
@@ -26,7 +26,7 @@ export async function generateImageAction(_prev: ImageState, formData: FormData)
   if (!notion) return { ok: false, error: "Notion introuvable." };
 
   try {
-    await generateIllustration({ userId: user.id, courseId, notion, extraPrompt });
+    const image = await generateIllustration({ userId: user.id, courseId, notion, extraPrompt });
     recordActivity({
       userId: user.id,
       courseId,
@@ -35,7 +35,8 @@ export async function generateImageAction(_prev: ImageState, formData: FormData)
       label: "Illustration générée",
     });
     revalidatePath(`/parcours/${courseId}/salle/${notionId}/fiche`);
-    return { ok: true, message: "Illustration générée et enregistrée." };
+    revalidatePath(`/parcours/${courseId}/visuel`);
+    return { ok: true, message: "Illustration générée et enregistrée.", image: { id: image.id, url: image.url } };
   } catch (error) {
     if (error instanceof ImageNotConfiguredError) return { ok: false, error: error.message };
     if (error instanceof BudgetError) return { ok: false, error: error.message };

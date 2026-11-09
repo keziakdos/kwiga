@@ -176,7 +176,10 @@ function FicheView({
         <section className="mt-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-board-deep">Schéma animé</h2>
           <div className="mt-2">
-            <NetworkAnimation title={content.title} />
+            <NetworkAnimation
+              title={content.title}
+              context={[content.intro, ...content.keyPoints, content.example].filter(Boolean).join(" ")}
+            />
           </div>
         </section>
       ) : null}

@@ -232,6 +232,7 @@ export default async function CoursePage({
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2">
+                  <Link href={`/parcours/${courseId}/visuel`} className="btn-ghost">Révision visuelle</Link>
                   <Link href={`/parcours/${courseId}/exercices`} className="btn-ghost">Exercices</Link>
                   <Link href={`/parcours/${courseId}/progression`} className="btn-ghost">Progression</Link>
                 </div>

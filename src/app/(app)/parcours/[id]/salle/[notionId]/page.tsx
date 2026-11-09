@@ -151,7 +151,10 @@ export default async function ClassroomPage({
               Schéma animé pas à pas
             </h2>
             <div className="mt-2">
-              <NetworkAnimation title={String(notion.title)} />
+              <NetworkAnimation
+                title={String(notion.title)}
+                context={[notion.summary, notion.explanation, notion.example].filter(Boolean).join(" ")}
+              />
             </div>
           </section>
         ) : null}
@@ -321,9 +324,12 @@ export default async function ClassroomPage({
         <NoteEditor notionId={nId} courseId={courseId} initialContent={noteRow?.content ?? ""} />
       </div>
 
-      <div className="mt-5 border-t border-paper-line pt-4 text-xs text-ink-faint">
+      <div className="mt-5 flex flex-wrap gap-3 border-t border-paper-line pt-4 text-xs text-ink-faint">
         <Link href={`/parcours/${courseId}/exercices`} className="font-medium text-board-deep hover:underline">
           Passer aux exercices →
+        </Link>
+        <Link href={`/parcours/${courseId}/visuel`} className="font-medium text-board-deep hover:underline">
+          Révision visuelle →
         </Link>
       </div>
     </div>
